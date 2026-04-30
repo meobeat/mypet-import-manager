@@ -348,3 +348,20 @@ Regole:
     except Exception as e:
         st.error("Errore OpenAI durante la generazione del parser.")
         st.code(str(e))
+
+    if "parser_generato" in st.session_state:
+        codice = st.session_state["parser_generato"]
+
+        st.subheader("Codice parser generato")
+        st.code(codice, language="python")
+
+        if st.button("💾 Salva parser"):
+            codice_pulito = codice.replace("
+python", "").replace("
+", "").strip()
+            percorso = PARSERS_DIR / f"{nome_parser}.py"
+
+            with open(percorso, "w", encoding="utf-8") as f:
+                f.write(codice_pulito)
+
+            st.success(f"Parser salvato: {percorso}")
