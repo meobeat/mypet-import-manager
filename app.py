@@ -302,41 +302,57 @@ with tab4:
     nome_parser = st.text_input("Nome parser da salvare", value="nuovo_parser")
 
     if st.button("Genera parser con AI"):
+
         if not pdf_file:
             st.warning("Carica prima una fattura PDF")
+
         else:
-    testo_ai = estrai_testo_pdf(pdf_file)
+            testo_ai = estrai_testo_pdf(pdf_file)
 
-    with st.spinner("Analisi fattura in corso..."):
-        try:
-            risposta = client.chat.completions.create(
-                model="gpt-4.1-mini",
-                messages=[
-                    {
-                        "role": "system",
-                        "content": """
+            with st.spinner("Analisi fattura in corso..."):
+                try:
+                    risposta = client.chat.completions.create(
+                        model="gpt-4.1-mini",
+                        messages=[
+                            {
+                                "role": "system",
+                                "content": """
 Sei un programmatore Python esperto in parsing di fatture PDF.
+
 Genera SOLO codice Python valido.
+
+Il codice deve contenere:
+import re
+import pandas as pd
+
+def can_parse(text):
+    return True
+
+def parse(text):
+    return un DataFrame con colonne Codice, Taglia, Quantità
 """
-                    },
-                    {"role": "user", "content": testo_ai[:5000]}
-                ]
-            )
+                            },
+                            {"role": "user", "content": testo_ai[:5000]}
+                        ]
+                    )
 
-            st.session_state["parser_generato"] = risposta.choices[0].message.content
+                    st.session_state["parser_generato"] = risposta.choices[0].message.content
 
-        except Exception as e:
-            st.error("Errore OpenAI")
-            st.code(str(e))
+                except Exception as e:
+                    st.error("Errore OpenAI")
+                    st.code(str(e))
 
     if "parser_generato" in st.session_state:
+
         codice = st.session_state["parser_generato"]
 
         st.subheader("Codice parser generato")
         st.code(codice, language="python")
 
         if st.button("💾 Salva parser"):
+
             codice_pulito = codice.replace("```python", "").replace("```", "").strip()
+
             percorso = PARSERS_DIR / f"{nome_parser}.py"
 
             with open(percorso, "w", encoding="utf-8") as f:
