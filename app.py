@@ -307,7 +307,8 @@ with tab4:
         else:
             testo_ai = estrai_testo_pdf(pdf_file)
 
-            with st.spinner("Analisi fattura in corso..."):
+    with st.spinner("Analisi fattura in corso..."):
+
     try:
         risposta = client.chat.completions.create(
             model="gpt-4.1-mini",
@@ -329,14 +330,6 @@ def can_parse(text):
 def parse(text):
     # ritorna un DataFrame pandas con colonne:
     # Codice, Taglia, Quantità
-
-Regole:
-- Non usare Streamlit
-- Non usare OpenAI
-- Non scrivere spiegazioni
-- Non usare markdown
-- Non mettere ```python
-- Il parser deve lavorare sul testo estratto dal PDF
 """
                 },
                 {"role": "user", "content": testo_ai[:5000]}
