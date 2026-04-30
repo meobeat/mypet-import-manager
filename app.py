@@ -305,40 +305,29 @@ with tab4:
         if not pdf_file:
             st.warning("Carica prima una fattura PDF")
         else:
-            
-testo_ai = estrai_testo_pdf(pdf_file)
-with st.spinner("Analisi fattura in corso..."):
-    try:
-        risposta = client.chat.completions.create(
-            model="gpt-4.1-mini",
-            messages=[
-                {
-                    "role": "system",
-                    "content": """
+    testo_ai = estrai_testo_pdf(pdf_file)
+
+    with st.spinner("Analisi fattura in corso..."):
+        try:
+            risposta = client.chat.completions.create(
+                model="gpt-4.1-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": """
 Sei un programmatore Python esperto in parsing di fatture PDF.
-
 Genera SOLO codice Python valido.
-
-Il codice deve contenere:
-import re
-import pandas as pd
-
-def can_parse(text):
-    return True
-
-def parse(text):
-    return un DataFrame con colonne Codice, Taglia, Quantità
 """
-                },
-                {"role": "user", "content": testo_ai[:5000]}
-            ]
-        )
+                    },
+                    {"role": "user", "content": testo_ai[:5000]}
+                ]
+            )
 
-        st.session_state["parser_generato"] = risposta.choices[0].message.content
+            st.session_state["parser_generato"] = risposta.choices[0].message.content
 
-    except Exception as e:
-        st.error("Errore OpenAI")
-        st.code(str(e))
+        except Exception as e:
+            st.error("Errore OpenAI")
+            st.code(str(e))
 
     if "parser_generato" in st.session_state:
         codice = st.session_state["parser_generato"]
