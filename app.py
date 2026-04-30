@@ -169,38 +169,31 @@ with tab1:
     archivio = carica_archivio()
     mappa = carica_mappa()
 
-    fornitore = st.text_input("Nome fornitore", value="Liu Jo Pets")
+    fornitore = st.text_input("Nome fornitore", value="Generico")
 
-if not parser_list:
-    st.error("Nessun parser trovato nella cartella parsers.")
-    st.warning("Vai nella tab 🤖 AI Parser per crearne uno nuovo.")
-    df = pd.DataFrame(columns=["Codice", "Taglia", "Quantità"])
+    if pdf_file:
 
-else:
-    parser_auto = riconosci_parser(testo)
+        testo = estrai_testo_pdf(pdf_file)
+        parser_list = lista_parser()
 
-    if parser_auto:
-        st.success(f"Parser automatico riconosciuto: {parser_auto}")
-        index_default = parser_list.index(parser_auto)
-    else:
-        st.warning("Parser non riconosciuto automaticamente.")
-        index_default = 0
+        if not parser_list:
+            st.error("Nessun parser trovato.")
+            st.warning("Vai nella tab 🤖 AI Parser per crearne uno nuovo.")
+            df = pd.DataFrame(columns=["Codice", "Taglia", "Quantità"])
 
-    parser_scelto = st.selectbox("Scegli parser", parser_list, index=index_default)
-
-    df = estrai_dati(testo, parser_scelto)
-    
-
-        if parser_auto:
-            st.success(f"Parser automatico riconosciuto: {parser_auto}")
-            index_default = parser_list.index(parser_auto)
         else:
-            st.warning("Parser non riconosciuto automaticamente.")
-            index_default = 0
+            parser_auto = riconosci_parser(testo)
 
-        parser_scelto = st.selectbox("Scegli parser", parser_list, index=index_default)
+            if parser_auto:
+                st.success(f"Parser automatico: {parser_auto}")
+                index_default = parser_list.index(parser_auto)
+            else:
+                st.warning("Parser non riconosciuto automaticamente.")
+                index_default = 0
 
-        df = estrai_dati(testo, parser_scelto)
+            parser_scelto = st.selectbox("Scegli parser", parser_list, index=index_default)
+
+            df = estrai_dati(testo, parser_scelto)
 
         st.subheader("Righe lette dalla fattura")
         st.dataframe(df, width="stretch")
@@ -208,6 +201,7 @@ else:
         risultati = []
 
         for _, r in df.iterrows():
+
             barcode, stato = trova_barcode(
                 archivio=archivio,
                 mappa=mappa,
@@ -232,60 +226,37 @@ else:
 
         anomalie = df_r[~df_r["Stato"].isin(["OK", "MAPPA"])]
 
-        col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Righe", len(df_r))
-        col2.metric("OK", len(df_r[df_r["Stato"] == "OK"]))
-        col3.metric("Mappa", len(df_r[df_r["Stato"] == "MAPPA"]))
-        col4.metric("Anomalie", len(anomalie))
-
         if not anomalie.empty:
-            st.subheader("Correzioni manuali con suggerimenti")
+            st.subheader("Correzioni manuali")
 
             for i, r in anomalie.iterrows():
-                with st.expander(f"{r['Codice']} - {r['Taglia']} | {r['Stato']}"):
+
+                with st.expander(f"{r['Codice']} - {r['Taglia']}"):
+
                     suggerimenti = suggerisci_articoli(archivio, r["Codice"], r["Taglia"])
 
                     st.write("Suggerimenti automatici:")
                     st.dataframe(suggerimenti, width="stretch")
 
-                    ean = st.text_input("EAN / Barcode corretto", key=f"ean_{i}")
+                    ean = st.text_input("EAN corretto", key=f"ean_{i}")
 
-                    if st.button("Salva in mappa fornitore", key=f"map_{i}"):
+                    if st.button("Salva", key=f"save_{i}"):
+
                         nuova = pd.DataFrame([{
-                            "Fornitore": r["Fornitore"],
+                            "Fornitore": fornitore,
                             "Codice Fattura": r["Codice"],
                             "Taglia": r["Taglia"],
                             "Barcode Interno": ean,
-                            "Note": "correzione manuale"
+                            "Note": "manuale"
                         }])
 
                         mappa = pd.concat([mappa, nuova], ignore_index=True)
-                        mappa = mappa.drop_duplicates(
-                            subset=["Fornitore", "Codice Fattura", "Taglia"],
-                            keep="last"
-                        )
-
                         salva_csv(mappa, MAPPA_FILE)
-                        st.success("Salvato in mappa fornitore. Ricarica la pagina per applicarlo.")
 
-        ok = df_r[df_r["Stato"].isin(["OK", "MAPPA"])]
+                        st.success("Salvato")
 
-        if not ok.empty:
-            stocks = ok.groupby("Barcode")["Quantità"].sum().reset_index()
-            stocks.columns = ["Barcode", "Quantity"]
-
-            st.subheader("CSV giacenze")
-            st.dataframe(stocks, width="stretch")
-
-            st.download_button(
-                "⬇️ Scarica stocks.csv",
-                stocks.to_csv(index=False).encode("utf-8-sig"),
-                "stocks.csv",
-                "text/csv"
-            )
     else:
         st.info("Carica una fattura PDF per iniziare.")
-
 
 with tab2:
     st.header("📚 Archivio prodotti Cassa in Cloud")
