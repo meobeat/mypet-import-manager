@@ -308,12 +308,13 @@ with tab4:
             testo_ai = estrai_testo_pdf(pdf_file)
 
             with st.spinner("Analisi fattura in corso..."):
-                risposta = client.chat.completions.create(
-                    model="gpt-4.1-mini",
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": """
+    try:
+        risposta = client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": """
 Sei un programmatore Python esperto in parsing di fatture PDF.
 
 Genera SOLO codice Python valido.
@@ -337,24 +338,13 @@ Regole:
 - Non mettere ```python
 - Il parser deve lavorare sul testo estratto dal PDF
 """
-                        },
-                        {"role": "user", "content": testo_ai[:5000]}
-                    ]
-                )
+                },
+                {"role": "user", "content": testo_ai[:5000]}
+            ]
+        )
 
-                st.session_state["parser_generato"] = risposta.choices[0].message.content
+        st.session_state["parser_generato"] = risposta.choices[0].message.content
 
-    if "parser_generato" in st.session_state:
-        codice = st.session_state["parser_generato"]
-
-        st.subheader("Codice parser generato")
-        st.code(codice, language="python")
-
-        if st.button("💾 Salva parser"):
-            codice_pulito = codice.replace("```python", "").replace("```", "").strip()
-            percorso = PARSERS_DIR / f"{nome_parser}.py"
-
-            with open(percorso, "w", encoding="utf-8") as f:
-                f.write(codice_pulito)
-
-            st.success(f"Parser salvato: {percorso}")
+    except Exception as e:
+        st.error("Errore OpenAI durante la generazione del parser.")
+        st.code(str(e))
