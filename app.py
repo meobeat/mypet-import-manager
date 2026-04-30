@@ -219,7 +219,10 @@ with tab1:
                 "Stato": stato
             })
 
-        df_r = pd.DataFrame(risultati)
+        df_r = pd.DataFrame(
+    risultati,
+    columns=["Fornitore", "Codice", "Taglia", "Quantità", "Barcode", "Stato"]
+)
 
         st.subheader("Matching articoli")
         st.dataframe(df_r, width="stretch")
