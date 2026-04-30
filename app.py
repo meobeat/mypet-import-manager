@@ -1,6 +1,7 @@
 from openai import OpenAI
 import importlib.util
-client = OpenAI(api_key="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")
+import os
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 import streamlit as st
 import pandas as pd
 import pdfplumber
@@ -12,7 +13,8 @@ from rapidfuzz import fuzz
 st.set_page_config(page_title="MyPet Import Manager PRO", layout="wide")
 st.title("🐾 MyPet Import Manager PRO")
 
-client = OpenAI(api_key="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")
+import os
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 DATA_DIR = Path("data")
 PARSERS_DIR = Path("parsers")
