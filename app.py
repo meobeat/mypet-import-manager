@@ -171,14 +171,11 @@ with tab1:
 
     fornitore = st.text_input("Nome fornitore", value="Liu Jo Pets")
 
-    if pdf_file:
-        testo = estrai_testo_pdf(pdf_file)
-        parser_list = lista_parser()
-
-        if not parser_list:
+if not parser_list:
     st.error("Nessun parser trovato nella cartella parsers.")
     st.warning("Vai nella tab 🤖 AI Parser per crearne uno nuovo.")
     df = pd.DataFrame(columns=["Codice", "Taglia", "Quantità"])
+
 else:
     parser_auto = riconosci_parser(testo)
 
@@ -190,6 +187,8 @@ else:
         index_default = 0
 
     parser_scelto = st.selectbox("Scegli parser", parser_list, index=index_default)
+
+    df = estrai_dati(testo, parser_scelto)
     
 
         if parser_auto:
