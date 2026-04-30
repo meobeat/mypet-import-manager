@@ -176,8 +176,21 @@ with tab1:
         parser_list = lista_parser()
 
         if not parser_list:
-            st.error("Nessun parser trovato nella cartella parsers.")
-            st.stop()
+    st.error("Nessun parser trovato nella cartella parsers.")
+    st.warning("Vai nella tab 🤖 AI Parser per crearne uno nuovo.")
+    df = pd.DataFrame(columns=["Codice", "Taglia", "Quantità"])
+else:
+    parser_auto = riconosci_parser(testo)
+
+    if parser_auto:
+        st.success(f"Parser automatico riconosciuto: {parser_auto}")
+        index_default = parser_list.index(parser_auto)
+    else:
+        st.warning("Parser non riconosciuto automaticamente.")
+        index_default = 0
+
+    parser_scelto = st.selectbox("Scegli parser", parser_list, index=index_default)
+    df = estrai_dati(testo, parser_scelto)
 
         parser_auto = riconosci_parser(testo)
 
