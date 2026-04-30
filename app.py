@@ -305,7 +305,7 @@ with tab4:
         if not pdf_file:
             st.warning("Carica prima una fattura PDF")
         else:
-            testo_ai = estrai_testo_pdf(pdf_file)
+            
 testo_ai = estrai_testo_pdf(pdf_file)
 with st.spinner("Analisi fattura in corso..."):
     try:
