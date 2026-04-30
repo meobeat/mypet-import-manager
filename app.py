@@ -148,7 +148,12 @@ def suggerisci_articoli(archivio, codice, taglia, limite=5):
     return pd.DataFrame(candidati).sort_values("Score", ascending=False).head(limite)
 
 
-pdf_file = st.file_uploader("Carica fattura PDF", type=["pdf"], key="pdf_global")
+uploaded_pdf = st.file_uploader("Carica fattura PDF", type=["pdf"], key="pdf_global")
+
+if uploaded_pdf is not None:
+    st.session_state["pdf_file"] = uploaded_pdf
+
+pdf_file = st.session_state.get("pdf_file", None)
 
 tab1, tab2, tab3, tab4 = st.tabs([
     "📦 Import fattura",
