@@ -307,8 +307,7 @@ with tab4:
         else:
             testo_ai = estrai_testo_pdf(pdf_file)
 
-    with st.spinner("Analisi fattura in corso..."):
-
+with st.spinner("Analisi fattura in corso..."):
     try:
         risposta = client.chat.completions.create(
             model="gpt-4.1-mini",
@@ -325,11 +324,10 @@ import re
 import pandas as pd
 
 def can_parse(text):
-    # ritorna True se riconosce il fornitore
+    return True
 
 def parse(text):
-    # ritorna un DataFrame pandas con colonne:
-    # Codice, Taglia, Quantità
+    return un DataFrame con colonne Codice, Taglia, Quantità
 """
                 },
                 {"role": "user", "content": testo_ai[:5000]}
@@ -339,7 +337,7 @@ def parse(text):
         st.session_state["parser_generato"] = risposta.choices[0].message.content
 
     except Exception as e:
-        st.error("Errore OpenAI durante la generazione del parser.")
+        st.error("Errore OpenAI")
         st.code(str(e))
 
     if "parser_generato" in st.session_state:
