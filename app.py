@@ -9,6 +9,7 @@ from pathlib import Path
 import importlib.util
 from openai import OpenAI
 from rapidfuzz import fuzz
+import re
 
 st.set_page_config(page_title="MyPet Import Manager PRO", layout="wide")
 st.title("🐾 MyPet Import Manager PRO")
@@ -308,7 +309,10 @@ with tab3:
 with tab4:
     st.header("🤖 AI - Generatore Parser")
 
-    nome_parser = st.text_input("Nome parser da salvare", value="nuovo_parser")
+    nome_parser = st.text_input(
+        "Nome parser da salvare",
+        value=st.session_state.get("nome_parser_ai", "nuovo_parser")
+    )
 
     if st.button("Genera parser con AI"):
 
@@ -330,22 +334,45 @@ Sei un programmatore Python esperto in parsing di fatture PDF.
 
 Genera SOLO codice Python valido.
 
+La prima riga del codice deve essere:
+# parser_name: nome_fornitore_in_minuscolo
+
 Il codice deve contenere:
 import re
 import pandas as pd
 
 def can_parse(text):
-    return True
+    # ritorna True se riconosce il fornitore
 
 def parse(text):
-    return un DataFrame con colonne Codice, Taglia, Quantità
+    # ritorna un DataFrame pandas con colonne:
+    # Codice, Taglia, Quantità
+
+Regole:
+- Non usare Streamlit
+- Non usare OpenAI
+- Non scrivere spiegazioni
+- Non usare markdown
+- Non mettere ```python
+- Il parser deve lavorare sul testo estratto dal PDF
 """
                             },
                             {"role": "user", "content": testo_ai[:5000]}
                         ]
                     )
 
-                    st.session_state["parser_generato"] = risposta.choices[0].message.content
+                    codice_ai = risposta.choices[0].message.content
+                    st.session_state["parser_generato"] = codice_ai
+
+                    match_nome = re.search(
+                        r"#\s*parser_name:\s*([a-zA-Z0-9_]+)",
+                        codice_ai
+                    )
+
+                    if match_nome:
+                        st.session_state["nome_parser_ai"] = match_nome.group(1)
+                    else:
+                        st.session_state["nome_parser_ai"] = "nuovo_parser"
 
                 except Exception as e:
                     st.error("Errore OpenAI")
@@ -358,11 +385,17 @@ def parse(text):
         st.subheader("Codice parser generato")
         st.code(codice, language="python")
 
+        nome_parser_finale = st.text_input(
+            "Conferma nome parser",
+            value=st.session_state.get("nome_parser_ai", nome_parser),
+            key="nome_parser_finale"
+        )
+
         if st.button("💾 Salva parser"):
 
             codice_pulito = codice.replace("```python", "").replace("```", "").strip()
 
-            percorso = PARSERS_DIR / f"{nome_parser}.py"
+            percorso = PARSERS_DIR / f"{nome_parser_finale}.py"
 
             with open(percorso, "w", encoding="utf-8") as f:
                 f.write(codice_pulito)
