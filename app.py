@@ -356,9 +356,7 @@ Regole:
         st.code(codice, language="python")
 
         if st.button("💾 Salva parser"):
-            codice_pulito = codice.replace("
-python", "").replace("
-", "").strip()
+            codice_pulito = codice.replace("```python", "").replace("```", "").strip()
             percorso = PARSERS_DIR / f"{nome_parser}.py"
 
             with open(percorso, "w", encoding="utf-8") as f:
