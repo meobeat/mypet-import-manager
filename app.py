@@ -190,9 +190,7 @@ else:
         index_default = 0
 
     parser_scelto = st.selectbox("Scegli parser", parser_list, index=index_default)
-    df = estrai_dati(testo, parser_scelto)
-
-        parser_auto = riconosci_parser(testo)
+    
 
         if parser_auto:
             st.success(f"Parser automatico riconosciuto: {parser_auto}")
