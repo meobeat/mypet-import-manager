@@ -129,6 +129,11 @@ def trova_barcode(archivio, mappa, codice, taglia, fornitore):
 
 
 def suggerisci_articoli(archivio, codice, taglia, limite=5):
+    if archivio is None or archivio.empty:
+        return pd.DataFrame(columns=[
+            "Score", "Barcode Interno", "Id Interno", "Descrizione", "Prezzo"
+        ])
+
     archivio_tmp = archivio.copy().fillna("")
     query = f"{codice} {taglia}".upper().strip()
     candidati = []
@@ -145,8 +150,12 @@ def suggerisci_articoli(archivio, codice, taglia, limite=5):
             "Prezzo": row.get("Prezzo", "")
         })
 
-    return pd.DataFrame(candidati).sort_values("Score", ascending=False).head(limite)
+    if not candidati:
+        return pd.DataFrame(columns=[
+            "Score", "Barcode Interno", "Id Interno", "Descrizione", "Prezzo"
+        ])
 
+    return pd.DataFrame(candidati).sort_values("Score", ascending=False).head(limite)
 
 uploaded_pdf = st.file_uploader("Carica fattura PDF", type=["pdf"], key="pdf_global")
 
